@@ -53,7 +53,7 @@ app.post('/register', async (req, res) => {
     await user.save();
     res.status(201).send('User registered successfully');
   } catch (error) {
-    res.status(500).send('Error registering user');
+    res.status(500).json({ msg: 'Error registering user' });
   }
 });
 
@@ -62,17 +62,17 @@ app.post('/login', async (req, res) => {
   const user = await User.findOne({ username: req.body.username });
   console.log(user)
   if (user == null) {
-    return res.status(400).send('Cannot find user');
+    return res.status(400).json({msg:'Cannot find user'});
   }
   try {
     if (await bcrypt.compare(req.body.password, user.password)) {
       const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
       res.json({ accessToken: accessToken });
     } else {
-      res.send('Not Allowed');
+      res.status(401).json({ msg: 'Invalid credentials' });
     }
   } catch {
-    res.status(500).send();
+    res.status(500).json({ msg: 'Internal server error' });
   }
 });
 
@@ -90,7 +90,7 @@ app.post('/incidents', authenticateToken, async (req, res) => {
     await incident.save();
     res.status(201).json(incident);
   } catch (error) {
-    res.status(500).send('Error creating incident');
+    res.status(500).json({ msg: 'Error creating incident' });
   }
 });
 
@@ -100,7 +100,7 @@ app.get('/incidents', async (req, res) => {
     const incidents = await Incident.find().sort('-createdAt');
     res.json(incidents);
   } catch (error) {
-    res.status(500).send('Error fetching incidents');
+    res.status(500).json({ msg: 'Error fetching incidents' });
   }
 });
 
